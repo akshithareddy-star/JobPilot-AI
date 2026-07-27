@@ -4,17 +4,30 @@
 ![Groq](https://img.shields.io/badge/Groq-Llama%203.3%2070B-blue)
 ![REST API](https://img.shields.io/badge/API-REST-green)
 ![AI](https://img.shields.io/badge/AI-Multi--Agent-purple)
-![License](https://img.shields.io/badge/License-Portfolio-blue)
+![Status](https://img.shields.io/badge/Status-Completed-success)
 
 ---
 
 ## 📌 Project Overview
 
-**JobPilot AI** is a Multi-Agent Career Intelligence System designed to help candidates evaluate their resumes against a job description and receive personalized career guidance.
+JobPilot AI is a **Multi-Agent Career Intelligence System** built using **n8n**, **Groq Llama 3.3 70B**, **Prompt Engineering**, and **REST APIs**.
 
-Instead of relying on a single AI prompt, the workflow is divided into multiple specialized AI agents, each responsible for a specific task such as candidate analysis, opportunity evaluation, career decision-making, and final report generation.
+The system helps candidates evaluate their resumes against a job description, identify skill gaps, receive personalized career guidance, and discover relevant live job opportunities.
 
-The system also integrates with an external Job Search API to fetch live job opportunities based on AI-generated recommendations, providing candidates with both career insights and relevant job opportunities.
+Instead of relying on a single AI prompt, the workflow is divided into multiple specialized AI agents, where each agent performs a dedicated responsibility. This modular architecture improves maintainability, scalability, and makes the workflow easier to extend.
+
+---
+
+## 🎥 Demo
+
+This project demonstrates an end-to-end AI-powered career intelligence workflow that:
+
+- Analyzes resumes
+- Evaluates job descriptions
+- Identifies skill gaps
+- Recommends suitable career paths
+- Retrieves live job opportunities
+- Generates a comprehensive Career Intelligence Report
 
 ---
 
@@ -45,7 +58,20 @@ The system also integrates with an external Job Search API to fetch live job opp
 
 ---
 
-# 🏗️ Workflow Architecture
+## 💡 Skills Demonstrated
+
+- Multi-Agent AI Workflow Design
+- Prompt Engineering
+- Workflow Automation
+- REST API Integration
+- JSON Data Processing
+- AI Application Development
+- Modular Workflow Design
+- System Integration
+
+---
+
+## 🏗️ Workflow Architecture
 
 The workflow follows a modular architecture where each AI agent is responsible for a single task.
 
@@ -132,7 +158,7 @@ Generates a structured career decision for downstream processing.
 
 ---
 
-# 🌐 External API Integration
+## 🌐 External API Integration
 
 After the Career Decision Agent recommends the most suitable role, the workflow extracts the required decision data and sends it to an external Job Search API using an HTTP Request node.
 
@@ -140,7 +166,7 @@ The API retrieves live job opportunities matching the recommended role, enabling
 
 ---
 
-# 📊 Final Career Intelligence Report
+## 📊 Final Career Intelligence Report
 
 The Final AI Agent combines:
 
@@ -157,15 +183,12 @@ into a single Career Intelligence Report.
 
 ---
 
-# 📁 Project Structure
+## 📁 Project Structure
 
 ```text
 JobPilot-AI/
 │
 ├── README.md
-│
-├── workflow/
-│   └── jobpilot-workflow.json
 │
 ├── docs/
 │   ├── workflow-overview.png
@@ -174,12 +197,15 @@ JobPilot-AI/
 │   ├── career-decision-agent.png
 │   └── final-report.png
 │
+├── workflow/
+│   └── jobpilot-workflow.json
+│
 └── prompts/
 ```
 
 ---
 
-# 🚀 Future Enhancements
+## 🚀 Future Enhancements
 
 - ATS Resume Score Prediction
 - Resume Optimization Suggestions
@@ -192,7 +218,7 @@ JobPilot-AI/
 
 ---
 
-# 🎯 Key Learnings
+## 🎯 Key Learnings
 
 Through this project, I gained hands-on experience in:
 
@@ -206,18 +232,18 @@ Through this project, I gained hands-on experience in:
 
 ---
 
-# 👩‍💻 Author
+## 🙏 Acknowledgements
+
+This project was developed as part of my AI and Workflow Automation learning journey to demonstrate the practical implementation of multi-agent AI systems using n8n, LLMs, and REST APIs.
+
+---
+
+## 👩‍💻 Author
 
 **Akshitha Reddy Gavinolla**
 
 B.Tech – Computer Science Engineering (Data Science)
 
-GitHub: https://github.com/your-github-username
+GitHub: https://github.com/akshithareddy-star
 
-LinkedIn: https://linkedin.com/in/your-linkedin-profile
-
----
-
-# 📜 License
-
-This project is created for educational, learning, and portfolio purposes.
+LinkedIn: https://www.linkedin.com/in/akshitha-reddy-gavinolla/
