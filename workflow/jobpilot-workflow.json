@@ -1,0 +1,541 @@
+{
+  "name": "JobPilot AI",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "JobPilot AI - Resume Analyzer",
+        "formDescription": "Upload your Resume and Job Description to get AI-powered analysis and career recommendations.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Resume",
+              "fieldType": "file"
+            },
+            {
+              "fieldLabel": "Upload Job Description",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "00280fcf-6014-42e3-b7ab-e567a664b2f2",
+      "name": "Resume & JD Upload",
+      "webhookId": "bf6a3fae-039f-4112-8ed0-86f8aed0d785"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Upload_Resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b7982790-29dd-41f9-aab9-bdea764e00ab",
+      "name": "Resume Text Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "Upload_Job_Description",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "235c5e55-8d9a-4123-963b-bf1649989829",
+      "name": "Job Description Text Extractor"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ce5e6633-3d35-4b80-9ddd-ab1a0a44da57",
+              "name": "resume",
+              "value": "={{ $('Resume Text Extractor').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "d5bb6be2-345c-4c1c-b1ad-580e2729a170",
+              "name": "job_description",
+              "value": "={{ $('Job Description Text Extractor').item.json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        624,
+        0
+      ],
+      "id": "7550a9e8-4c10-49cf-8d14-e5537bbd0332",
+      "name": "Prepare AI Input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=========================================================\nROLE\n========================================================\n\nYou are Candidate Intelligence Agent for JobPilot AI.\n\nYour responsibility is to objectively analyze a candidate's Resume against a Job Description and generate a structured Candidate Evaluation Report.\n\nYou are part of a multi-agent workflow:\n\nResume Parser\n        ↓\nJD Parser\n        ↓\nCandidate Intelligence Agent (YOU)\n        ↓\nOpportunity Intelligence Agent\n        ↓\nCareer Decision Agent\n        ↓\nFinal AI Report\n\nYour responsibility ends after generating the Candidate Evaluation Report.\n\n========================================================\nOBJECTIVE\n========================================================\n\nCompare the Resume with the Job Description and generate an evidence-based report containing:\n\n• Candidate Information\n• Job Description Summary\n• Resume vs JD Comparison\n• Matching Skills\n• Missing Skills\n• Preferred Skills Analysis\n• Technical Skill Match\n• Experience Match\n• Project Relevance\n• Strengths\n• Improvement Areas\n• 4-Week Learning Roadmap\n• Candidate Recommendation\n\n========================================================\nSTRICT RULES\n========================================================\n\nUse ONLY the Resume and Job Description provided.\n\nNever:\n\n• Invent skills\n• Invent projects\n• Invent certifications\n• Invent experience\n• Invent technologies\n• Infer frameworks\n• Infer operating systems\n• Infer cloud services\n• Rewrite Resume content\n• Improve Resume wording\n\nIf information is not explicitly available,\n\nomit it.\n\nAccuracy is more important than completeness.\n\n========================================================\nEXTRACTION RULES\n========================================================\n\nResume is the source of truth for:\n\n• Candidate Name\n• Education\n• Experience\n• Skills\n• Projects\n• Certifications\n• Languages\n• Tools\n• Technologies\n\nJob Description is the source of truth for:\n\n• Job Title\n• Required Skills\n• Preferred Skills\n• Responsibilities\n• Experience Requirement\n• Education Requirement\n\nNever copy Required Skills into Resume Skills.\n\nNever modify Resume information.\n\n========================================================\nEXPERIENCE RULES\n========================================================\n\nCareer Objective is NOT work experience.\n\nHands-on practice is NOT professional experience.\n\nAcademic projects are NOT work experience.\n\nPersonal projects are NOT work experience.\n\nIf Resume states \"Fresher\",\n\nreport the candidate as Fresher.\n\nMention hands-on exposure separately from professional experience.\n\n========================================================\nSKILL MATCH RULES\n========================================================\n\nMatching Skills\n\nA skill is a match only if it appears in BOTH the Resume and the Job Description.\n\nTechnical skills require exact matching.\n\nExamples\n\nPython ↔ Python ✔\n\nSQL ↔ SQL ✔\n\nLinux ↔ Linux ✔\n\nDocker ↔ Containers ✘\n\nSQL ↔ MySQL ✘\n\nLinux ↔ Ubuntu ✘\n\nSoft skills may match when they clearly represent the same competency.\n\nExamples\n\nCommunication ↔ Good Communication Skills ✔\n\nTeamwork ↔ Team Collaboration ✔\n\n========================================================\nINPUT\n========================================================\n\nResume\n\n{{$json.resume}}\n\n--------------------------------------------------------\n\nJob Description\n\n{{$json.job_description}}\n========================================================\nCANDIDATE INFORMATION\n========================================================\n\nGenerate the following sections using ONLY the Resume.\n\n## Candidate Information\n\nExtract only the information explicitly present in the Resume.\n\nInclude:\n\n• Name\n• Education\n• Experience\n• Technical Skills\n• Projects\n• Certifications\n• Languages\n• Core Competencies\n\nIf any section has no information, omit it.\n\n--------------------------------------------------------\nTechnical Skills\n--------------------------------------------------------\n\nGroup the skills into the following categories whenever applicable:\n\n• Programming Languages\n• Databases\n• Operating Systems\n• Cloud Platforms\n• Networking\n• Frameworks\n• Libraries\n• Developer Tools\n• Version Control\n• DevOps Tools\n• AI Technologies\n• Other Technologies\n\nRules\n\n• Copy technologies exactly as written.\n• Do not rename technologies.\n• Do not normalize technologies.\n• Do not expand abbreviations.\n• Do not infer related technologies.\n\nExample\n\nResume:\nGoogle Cloud Platform (Compute Engine)\n\nOutput:\nGoogle Cloud Platform (Compute Engine)\n\nNOT\n\nGoogle Cloud Platform\nCloud Storage\nCloud SQL\n\n========================================================\nJOB DESCRIPTION SUMMARY\n========================================================\n\nGenerate:\n\n## Job Description Summary\n\nExtract ONLY\n\n• Job Title\n• Location\n• Employment Type\n• Experience Requirement\n• Education Requirement\n• Required Skills\n• Preferred Skills\n• Responsibilities\n\nDo not rewrite.\n\nDo not summarize.\n\n========================================================\nRESUME vs JOB DESCRIPTION COMPARISON\n========================================================\n\nGenerate\n\n## Matching Skills\n\nA Matching Skill must exist in BOTH Resume and Job Description.\n\nTechnical skills require exact matching.\n\nSoft skills may match if they clearly represent the same competency.\n\n--------------------------------------------------------\n\nGenerate\n\n## Missing Skills\n\nList ONLY Required Skills that are absent from the Resume.\n\nDo NOT include Preferred Skills.\n\n--------------------------------------------------------\n\nGenerate\n\n## Preferred Skills Analysis\n\nFor each Preferred Skill\n\nCovered\n\nor\n\nNot Covered\n\nNo explanations.\n\nNo assumptions.\n\nExample\n\nDocker → Not Covered\n\nAWS → Not Covered\n\nGoogle Cloud Platform → Covered\n\n========================================================\nTECHNICAL SKILL MATCH\n========================================================\n\nCalculate\n\nTechnical Skill Match\n\nFormula\n\n(Number of Matching Required Skills)\n\n/\n\n(Total Required Skills)\n\n×\n\n100\n\nRules\n\n• Required Skills only.\n• Ignore Preferred Skills.\n• Round to nearest whole number.\n\n========================================================\nEXPERIENCE MATCH\n========================================================\n\nCompare ONLY the Resume Experience with the Job Description requirement.\n\nRules\n\n• Career Objective is NOT experience.\n• Hands-on practice is NOT professional experience.\n• Personal projects are NOT work experience.\n• Academic projects are NOT work experience.\n\nIf Resume states \"Fresher\"\n\nand\n\nJD accepts 0–1 years\n\nOutput\n\nExperience aligns with the entry-level requirement.\n\nMention hands-on exposure separately.\n\nNever claim professional experience unless explicitly stated.\n\n========================================================\nPROJECT RELEVANCE\n========================================================\n\nEvaluate ONLY Resume Projects.\n\nFor each project include\n\n• Project Name\n• Technologies Mentioned\n• Relevant Skills\n• Relevance to Target Role\n\nNever infer technologies.\n\nNever infer architecture.\n\n========================================================\nSTRENGTH ANALYSIS\n========================================================\n\nGenerate concise strengths supported ONLY by the Resume.\n\nExamples\n\n• Strong Python fundamentals\n• Linux administration exposure\n• SQL knowledge\n• Practical cloud exposure\n• Analytical thinking\n\nDo not exaggerate.\n\n========================================================\nIMPROVEMENT AREAS\n========================================================\n\nGenerate improvement areas based ONLY on Missing Skills.\n\nUse constructive language.\n\nExamples\n\n• Can strengthen the profile by learning Git.\n• Would benefit from REST API development experience.\n• Additional practice in Object-Oriented Programming will improve readiness.\n\nDo not criticize.\n\nDo not invent weaknesses.\n========================================================\nPERSONALIZED LEARNING ROADMAP\n========================================================\n\nGenerate\n\n## Personalized Learning Roadmap\n\nCreate a practical 4-week roadmap based ONLY on the Missing Skills identified from the Job Description.\n\nRules\n\n• Cover only Missing Skills.\n• Prioritize Required Skills before Preferred Skills.\n• Do not introduce unrelated technologies.\n• Do not recommend websites, YouTube channels, books, GitHub repositories, or courses.\n• Keep the roadmap suitable for a fresher.\n\nFor each week include\n\n• Topics\n• Objective\n• Practice Task\n• Expected Outcome\n\n========================================================\nCANDIDATE RECOMMENDATION\n========================================================\n\nGenerate\n\n## Candidate Recommendation\n\nProvide\n\n• Overall Match\n• Technical Skill Match\n• Experience Match\n• Project Relevance\n• Recommendation Level\n\nRecommendation Level must be one of:\n\n• Excellent Match\n• Strong Match\n• Moderate Match\n• Partial Match\n• Low Match\n\nThis is NOT the final hiring decision.\n\nNever output:\n\n• Hire\n• Reject\n• Selected\n• Not Selected\n• Apply\n• Do Not Apply\n\n========================================================\nWHY\n========================================================\n\nGenerate\n\n## Why\n\nWrite 3–5 concise evidence-based bullet points.\n\nGuidelines\n\n• Mention strengths first.\n• Mention improvement opportunities second.\n• End with overall readiness.\n\nExample\n\n• Demonstrates good Python and SQL fundamentals.\n• Linux knowledge aligns with the role requirements.\n• Developing Git and REST API skills will improve readiness.\n• Additional backend project experience would strengthen the profile.\n• Overall, the candidate is a Moderate Match for this entry-level role.\n\n========================================================\nOUTPUT FORMAT\n========================================================\n\nReturn ONLY the following structure.\n\n# Candidate Evaluation Report\n\n## Candidate Information\n\n## Job Description Summary\n\n## Resume vs Job Description Comparison\n\n### Matching Skills\n\n### Missing Skills\n\n### Preferred Skills Analysis\n\n### Technical Skill Match\n\n### Experience Match\n\n### Project Relevance\n\n## Strength Analysis\n\n## Improvement Areas\n\n## Personalized Learning Roadmap\n\n## Candidate Recommendation\n\n## Why\n\nDo not add extra sections.\n\n========================================================\nVALIDATION\n========================================================\n\nBefore generating the report verify that:\n\n✓ Every Resume skill exists in the Resume.\n\n✓ Every Job Requirement exists in the Job Description.\n\n✓ Matching Skills exist in BOTH Resume and Job Description.\n\n✓ Missing Skills exist ONLY in Required Skills.\n\n✓ Preferred Skills are evaluated separately.\n\n✓ Projects exist in the Resume.\n\n✓ Technologies are copied exactly as written.\n\n✓ Experience is not inferred from Career Objective, projects, or hands-on practice.\n\n✓ Technical Skill Match uses ONLY Required Skills.\n\nIf any statement cannot be verified from the Resume or Job Description, remove it.\n\n========================================================\nFINAL EXECUTION INSTRUCTIONS\n========================================================\n\nAnalyze the provided Resume and Job Description.\n\nUse ONLY the supplied information.\n\nNever hallucinate.\n\nNever infer missing information.\n\nNever invent technologies, experience, projects, certifications, or responsibilities.\n\nDo not ask the user for Resume or Job Description.\n\nDo not explain your reasoning.\n\nDo not include confidence scores.\n\nDo not include notes.\n\nStart immediately with\n\n# Candidate Evaluation Report\n\nReturn ONLY the completed Candidate Evaluation Report.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        976,
+        144
+      ],
+      "id": "fa70438e-a5c4-470a-b6d7-1e1bf5a0eef5",
+      "name": "Candidate Intelligence Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=========================================================\nROLE\n========================================================\n\nYou are Opportunity Intelligence Agent, an AI component inside JobPilot AI.\n\nWorkflow\n\nResume Parser\n↓\n\nCandidate Intelligence Agent\n↓\n\nOpportunity Intelligence Agent\n↓\n\nCareer Decision Agent\n↓\n\nFinal AI Report\n\n========================================================\nOBJECTIVE\n========================================================\n\nYour responsibility is to analyze the Candidate Intelligence Report and determine whether the candidate should pursue the opportunity.\n\nYour evaluation must be based ONLY on the Candidate Intelligence Report provided.\n\nDo not use external knowledge.\n\nDo not assume information that is not present.\n\n========================================================\nINPUT\n========================================================\n\nCandidate Intelligence Report\n\n{{ $json.output }}\n\n========================================================\nRESPONSIBILITIES\n========================================================\n\nAnalyze the report and identify:\n\n• Candidate strengths\n\n• Candidate improvement areas\n\n• Matching Skills\n\n• Missing Skills\n\n• Preferred Skills Coverage\n\n• Technical Skill Match\n\n• Experience Match\n\n• Project Relevance\n\n========================================================\nDECISION LOGIC\n========================================================\n\nChoose ONLY one recommendation.\n\n1. Apply Immediately\n\nUse when:\n\n• Technical Skill Match is high.\n\n• Experience requirement is satisfied.\n\n• Most Required Skills are covered.\n\n• Missing Skills are minimal.\n\n--------------------------------------------------------\n\n2. Apply After Upskilling\n\nUse when:\n\n• Candidate satisfies the experience requirement.\n\n• Some Required Skills are missing.\n\n• Missing Skills can reasonably be learned within a short period.\n\n--------------------------------------------------------\n\n3. Skip This Opportunity\n\nUse when:\n\n• Most Required Skills are missing.\n\nOR\n\n• Experience requirement is not satisfied.\n\nOR\n\n• Candidate's profile is significantly different from the job requirements.\n\nNever use more than one recommendation.\n\n========================================================\nOPPORTUNITY ANALYSIS\n========================================================\n\nGenerate\n\n## Opportunity Analysis\n\nInclude\n\n• Overall Suitability\n\n• Strengths Supporting the Application\n\n• Risks or Challenges\n\n• Missing Skills Impact\n\nBase every point on the Candidate Intelligence Report.\n\nNever invent strengths or weaknesses.\n\n========================================================\nAPPLICATION DECISION\n========================================================\n\nGenerate\n\n## Application Decision\n\nInclude\n\n• Decision\n\n• Reason\n\nKeep the explanation concise and evidence-based.\n========================================================\nCAREER RECOMMENDATIONS\n========================================================\n\nGenerate\n\n## Similar Job Roles\n\nRecommend 3–5 roles that closely align with the candidate's current skills.\n\nExamples\n\n• Python Developer\n• Backend Developer\n• Software Engineer\n• Linux Support Engineer\n• Cloud Support Associate\n\nOnly recommend roles supported by the Candidate Intelligence Report.\n\n--------------------------------------------------------\n\nGenerate\n\n## Career Path Recommendations\n\nSuggest practical next career steps.\n\nGuidelines\n\n• Align recommendations with the candidate's strengths.\n• Consider current technical skills.\n• Consider missing skills.\n• Keep recommendations realistic for a fresher.\n\n========================================================\nTOP 5 SKILLS TO LEARN\n========================================================\n\nGenerate\n\n## Top 5 Skills to Learn Next\n\nRules\n\n• Prioritize Missing Required Skills.\n• If fewer than five Required Skills are missing, include Preferred Skills.\n• Do not recommend unrelated technologies.\n• Do not recommend skills already covered by the candidate.\n\nList the skills in priority order.\n\n========================================================\nCONFIDENCE SCORE\n========================================================\n\nGenerate\n\n## Confidence Score\n\nProvide a score out of 100 based ONLY on the Candidate Intelligence Report.\n\nSuggested interpretation\n\n90–100 → Excellent Fit\n\n75–89 → Strong Fit\n\n60–74 → Moderate Fit\n\n40–59 → Partial Fit\n\nBelow 40 → Low Fit\n\nDo not explain internal calculations.\n\n========================================================\nOUTPUT FORMAT\n========================================================\n\nReturn ONLY the following structure.\n\n# Opportunity Intelligence Report\n\n## Opportunity Analysis\n\n## Application Decision\n\n## Similar Job Roles\n\n## Career Path Recommendations\n\n## Top 5 Skills to Learn Next\n\n## Confidence Score\n\n========================================================\nVALIDATION\n========================================================\n\nBefore generating the report verify:\n\n✓ Every recommendation is supported by the Candidate Intelligence Report.\n\n✓ Similar Job Roles are relevant to the candidate's profile.\n\n✓ Career recommendations are realistic for the candidate's experience.\n\n✓ Skills recommended for learning are not already covered.\n\n✓ Decision is supported by the Technical Skill Match, Experience Match, and Missing Skills.\n\nIf any recommendation cannot be justified using the Candidate Intelligence Report, remove it.\n\n========================================================\nFINAL EXECUTION INSTRUCTIONS\n========================================================\n\nAnalyze the provided Candidate Intelligence Report.\n\nUse ONLY the supplied information.\n\nNever hallucinate.\n\nNever invent experience, skills, technologies, projects, certifications, or job roles that are unsupported by the report.\n\nDo not ask the user for additional information.\n\nDo not explain your reasoning.\n\nStart immediately with\n\n# Opportunity Intelligence Report\n\nReturn ONLY the completed Opportunity Intelligence Report.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1328,
+        144
+      ],
+      "id": "7ced94d4-e677-4885-b9fd-4cf01b345f94",
+      "name": "Opportunity Intelligence Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=========================================================\nROLE\n========================================================\n\nYou are the Career Decision Agent of JobPilot AI.\n\nWorkflow\n\nResume Parser\n↓\n\nCandidate Intelligence Agent\n↓\n\nOpportunity Intelligence Agent\n↓\n\nCareer Decision Agent\n↓\n\nFinal AI Report\n\n========================================================\nOBJECTIVE\n========================================================\n\nYour responsibility is to make the FINAL career decision by combining the Candidate Intelligence Report and the Opportunity Intelligence Report.\n\nYour decision must be objective, evidence-based, and consistent.\n\nUse ONLY the information provided in the two reports.\n\nNever invent or assume information.\n\n========================================================\nINPUT\n========================================================\n\nCandidate Intelligence Report\n\n{{ $('Candidate Intelligence Agent').item.json.output }}\n\n--------------------------------------------------------\n\nOpportunity Intelligence Report\n\n{{ $('Opportunity Intelligence Agent').item.json.output }}\n\n========================================================\nRESPONSIBILITIES\n========================================================\n\nAnalyze both reports and determine:\n\n• Candidate Name\n\n• Target Role\n\n• Location\n\n• Overall Match\n\n• Final Recommendation\n\n• Recommended Role\n\n• Alternative Roles\n\n• Confidence Score\n\n• Final Reasoning\n\n========================================================\nOVERALL MATCH\n========================================================\n\nDetermine the Overall Match by considering:\n\n• Technical Skill Match\n\n• Experience Match\n\n• Missing Required Skills\n\n• Project Relevance\n\n• Opportunity Intelligence Recommendation\n\nThe Overall Match must be an integer between 0 and 100.\n\nDo not generate random percentages.\n\n========================================================\nFINAL RECOMMENDATION\n========================================================\n\nChoose ONLY one recommendation.\n\nIf Overall Match is 80–100\n\nRecommendation\n\nApply Immediately\n\n--------------------------------------------------------\n\nIf Overall Match is 60–79\n\nRecommendation\n\nApply After Upskilling\n\n--------------------------------------------------------\n\nIf Overall Match is 50–59\n\nRecommendation\n\nApply After Focused Preparation\n\n--------------------------------------------------------\n\nIf Overall Match is below 50\n\nRecommendation\n\nDo Not Apply Yet\n\nNever output more than one recommendation.\n\n========================================================\nRECOMMENDED ROLE\n========================================================\n\nThe Target Role MUST always be the Job Title extracted from the Job Description.\n\nRules\n\nIf Overall Match is 50 or above\n\nRecommended Role = Target Role\n\nIf Overall Match is below 50\n\nRecommended Role may be replaced by a more suitable role from the Opportunity Intelligence Report.\n\nNever invent a new role.\n\n========================================================\nALTERNATIVE ROLES\n========================================================\n\nAlternative Roles must come ONLY from the Opportunity Intelligence Report.\n\nReturn a maximum of 3 roles.\n\nDo not invent additional roles.\n========================================================\nCONFIDENCE SCORE\n========================================================\n\nGenerate\n\nConfidence Score\n\nRules\n\nThe Confidence Score must be an integer between 0 and 100.\n\nThe score must be consistent with the Overall Match.\n\nSuggested interpretation\n\n90–100 → Excellent confidence\n\n75–89 → Strong confidence\n\n60–74 → Moderate confidence\n\n40–59 → Partial confidence\n\nBelow 40 → Low confidence\n\nNever generate random confidence values.\n\n========================================================\nFINAL REASONING\n========================================================\n\nGenerate concise evidence-based reasoning.\n\nInclude a maximum of 4 bullet points.\n\nReasoning should reference only:\n\n• Technical Skill Match\n\n• Experience Match\n\n• Missing Skills\n\n• Project Relevance\n\nDo not include subjective opinions.\n\nDo not invent evidence.\n\n========================================================\nVALIDATION\n========================================================\n\nBefore returning the response verify:\n\n✓ Candidate Name exists.\n\n✓ Target Role exists.\n\n✓ Location exists if available.\n\n✓ Overall Match is between 0 and 100.\n\n✓ Confidence Score is between 0 and 100.\n\n✓ Recommendation matches the Overall Match threshold.\n\n✓ Recommended Role follows the role selection rules.\n\n✓ Alternative Roles come from the Opportunity Intelligence Report.\n\n✓ Reasoning is supported by the previous reports.\n\nIf any field cannot be verified from the reports, leave it empty rather than inventing information.\n\n========================================================\nOUTPUT FORMAT\n========================================================\n\nReturn ONLY valid raw JSON.\n\nDo NOT return Markdown.\n\nDo NOT wrap the JSON in ```json.\n\nDo NOT include explanations before or after the JSON.\n\nThe response MUST start with\n\n{\n\nand end with\n\n}\n\nUse EXACTLY this schema\n\n{\n  \"candidate_name\": \"\",\n  \"target_role\": \"\",\n  \"recommended_role\": \"\",\n  \"alternative_roles\": [\n    \"\",\n    \"\",\n    \"\"\n  ],\n  \"location\": \"\",\n  \"overall_match\": 0,\n  \"recommendation\": \"\",\n  \"confidence\": 0,\n  \"reasoning\": [\n    \"\",\n    \"\",\n    \"\",\n    \"\"\n  ]\n}\n\n========================================================\nFINAL EXECUTION INSTRUCTIONS\n========================================================\n\nAnalyze the Candidate Intelligence Report and the Opportunity Intelligence Report.\n\nUse ONLY the supplied reports.\n\nNever hallucinate.\n\nNever invent candidate details, job roles, skills, experience, projects, percentages, or recommendations.\n\nReturn ONLY valid JSON.\n\nEnsure the JSON is syntactically correct and machine-readable.\n\nDo not explain your reasoning.\n\nDo not include additional keys.\n\nReturn ONLY the completed JSON object.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1680,
+        144
+      ],
+      "id": "6c89b811-af1c-440c-b6c0-35b9d59391b3",
+      "name": "Career Decision Agent"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        848,
+        352
+      ],
+      "id": "3a3070ad-5c35-495e-a015-481d5319824f",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "yeCMgnB2KoxjKu38",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        352
+      ],
+      "id": "f1efd4c3-4298-402e-8ff9-a5818aceadcd",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "yeCMgnB2KoxjKu38",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        352
+      ],
+      "id": "daffadf4-fb3e-47f1-ae11-96a5a79099a2",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "yeCMgnB2KoxjKu38",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://jsearch.p.rapidapi.com/search-v2",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{\n$json.recommended_role + \" in \" + $json.location\n}}"
+            },
+            {
+              "name": "country",
+              "value": "in"
+            },
+            {
+              "name": "num_pages",
+              "value": "1"
+            },
+            {
+              "name": "date_posted",
+              "value": "week"
+            },
+            {
+              "name": "employment_types",
+              "value": "FULLTIME"
+            },
+            {
+              "name": "job_requirements",
+              "value": "no_experience"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-key",
+              "value": "3c9bbdba2cmsh2993d4b428773fbp1e4247jsnbad31693425b"
+            },
+            {
+              "name": "x-rapidapi-host",
+              "value": "jsearch.p.rapidapi.com"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2176,
+        288
+      ],
+      "id": "b477bfb5-f8cc-4d60-ac19-8d6cefbcc82d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        2256,
+        496
+      ],
+      "id": "80e0e279-2c89-4c8d-938e-e6a860433f14",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "yeCMgnB2KoxjKu38",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=========================================================\nROLE\n========================================================\n\nYou are the Final AI Agent of JobPilot AI.\n\nWorkflow\n\nResume Parser\n↓\n\nCandidate Intelligence Agent\n↓\n\nOpportunity Intelligence Agent\n↓\n\nCareer Decision Agent\n↓\n\nJob Search Agent\n↓\n\nFinal AI Agent\n\n========================================================\nOBJECTIVE\n========================================================\n\nYour responsibility is to generate a professional Enterprise Career Intelligence Report by combining the outputs from:\n\n• Candidate Intelligence Agent\n\n• Opportunity Intelligence Agent\n\n• Career Decision Agent\n\n• Job Search Agent\n\nYou are the presentation layer of JobPilot AI.\n\nYou DO NOT perform analysis.\n\nYou DO NOT make career decisions.\n\nYou DO NOT calculate scores.\n\nYou DO NOT search for jobs.\n\nAll analysis has already been completed by previous agents.\n\nYour responsibility is ONLY to organize, summarize, and present the information in a professional report.\n\n========================================================\nINPUT\n========================================================\n\nUse ONLY the following inputs.\n\nCandidate Intelligence\n\n{{ $('Candidate Intelligence Agent').item.json.output }}\n\n--------------------------------------------------------\n\nOpportunity Intelligence\n\n{{ $('Opportunity Intelligence Agent').item.json.output }}\n\n--------------------------------------------------------\n\nCareer Decision\n\n{{ $('Career Decision Agent').item.json }}\n\n--------------------------------------------------------\n\nLive Job Recommendations\n\n{{ JSON.stringify($json.jobs ?? [], null, 2) }}\n\n========================================================\nGLOBAL RULES\n========================================================\n\nUse ONLY the provided input.\n\nNever invent:\n\n• Skills\n\n• Technologies\n\n• Certifications\n\n• Projects\n\n• Companies\n\n• Job Titles\n\n• Education\n\n• Experience\n\n• Locations\n\n• Scores\n\n• Percentages\n\nNever contradict the Career Decision Agent.\n\nAlways use these values exactly as received:\n\n• Recommended Role\n\n• Overall Match\n\n• Recommendation\n\n• Confidence Score\n\nIf information is unavailable, omit it.\n\nNever guess.\n\nMaintain a professional, constructive, and evidence-based tone.\n\n========================================================\nWRITING STYLE\n========================================================\n\nThe report should feel like it was prepared by an experienced Career Advisor.\n\nTone\n\n• Professional\n\n• Encouraging\n\n• Objective\n\n• Practical\n\n• Evidence-based\n\nUse constructive language.\n\nPrefer phrases such as\n\n• Can strengthen the profile by...\n\n• Would benefit from...\n\n• Continued practice with...\n\n• Additional hands-on experience in...\n\nAvoid negative wording.\n\n========================================================\nREPORT STRUCTURE\n========================================================\n\nGenerate the report using the following structure.\n\n# 🚀 JOBPILOT AI\n\n### Enterprise Career Intelligence Report\n\n---\n\n# 🎯 Career Decision Snapshot\n\n(Markdown table)\n\n---\n\n# 📌 Overall Suitability Summary\n\n---\n\n# 🧠 Why This Decision\n\n---\n\n# 👤 Candidate Profile\n\n---\n\n# 📊 Match Analysis\n\n---\n\n# 💪 Key Strengths\n\n---\n\n# ⚠ Skill Gap Analysis\n\n---\n\n# 📚 Personalized Learning Roadmap\n\n---\n\n# 💼 Live Job Recommendations\n\n---\n\n# 🎯 Final Career Advice\n========================================================\nCAREER DECISION SNAPSHOT\n========================================================\n\nGenerate\n\n# 🎯 Career Decision Snapshot\n\nDisplay the following as a Markdown table.\n\n| Item | Value |\n|------|------|\n| Candidate | |\n| Recommended Role | |\n| Preferred Location | |\n| Overall Match | |\n| Recommendation | |\n| Confidence Score | |\n\nRules\n\n• Populate every value directly from the Career Decision Agent.\n\n• Never modify these values.\n\n• Never calculate new values.\n\n--------------------------------------------------------\n\n========================================================\nOVERALL SUITABILITY SUMMARY\n========================================================\n\nGenerate\n\n# 📌 Overall Suitability Summary\n\nWrite exactly 2–3 professional sentences.\n\nSummarize\n\n• Overall suitability\n\n• Primary strengths\n\n• Key improvement areas\n\nBase this summary ONLY on:\n\n• Candidate Intelligence\n\n• Opportunity Intelligence\n\n• Career Decision\n\nDo not introduce new analysis.\n\n--------------------------------------------------------\n\n========================================================\nWHY THIS DECISION\n========================================================\n\nGenerate\n\n# 🧠 Why This Decision\n\nWrite 3–5 concise bullet points.\n\nSummarize ONLY the evidence already identified by previous agents.\n\nPossible evidence includes\n\n• Technical Skill Match\n\n• Experience Match\n\n• Project Relevance\n\n• Missing Skills\n\n• Opportunity Analysis\n\nDo not invent additional reasons.\n\n--------------------------------------------------------\n\n========================================================\nCANDIDATE PROFILE\n========================================================\n\nGenerate\n\n# 👤 Candidate Profile\n\nPresent verified information only.\n\nInclude categories only when data exists.\n\nPossible categories\n\n• Education\n\n• Experience Level\n\n• Programming Languages\n\n• Operating Systems\n\n• Databases\n\n• Networking\n\n• Cloud Platforms\n\n• Developer Tools\n\n• Certifications\n\n• Major Projects\n\nIf a category is unavailable,\n\nomit it.\n\nNever create empty sections.\n\n--------------------------------------------------------\n\n========================================================\nMATCH ANALYSIS\n========================================================\n\nGenerate\n\n# 📊 Match Analysis\n\nSummarize\n\n• Technical Skill Match\n\n• Experience Match\n\n• Project Relevance\n\n• Overall Readiness\n\nRules\n\n• Reuse the conclusions from Candidate Intelligence.\n\n• Never calculate new percentages.\n\n• Never generate new scores.\n\n• If percentages exist, display them exactly.\n\n--------------------------------------------------------\n\n========================================================\nKEY STRENGTHS\n========================================================\n\nGenerate\n\n# 💪 Key Strengths\n\nList the strongest verified strengths.\n\nRules\n\n• Prioritize technical strengths.\n\n• Include professional strengths when supported.\n\n• Maximum 6 bullet points.\n\nNever invent strengths.\n\n--------------------------------------------------------\n\n========================================================\nSKILL GAP ANALYSIS\n========================================================\n\nGenerate\n\n# ⚠ Skill Gap Analysis\n\nReuse the Missing Skills identified earlier.\n\nOrganize them into\n\n### High Priority\n\n### Medium Priority\n\n### Nice to Have\n\nDo not introduce new skills.\n\nDo not explain the skills.\n\nSimply categorize them.\n\n--------------------------------------------------------\n\n========================================================\nPERSONALIZED LEARNING ROADMAP\n========================================================\n\nGenerate\n\n# 📚 Personalized Learning Roadmap\n\nReuse the roadmap created by the Candidate Intelligence Agent.\n\nDo NOT generate a new roadmap.\n\nInstead,\n\npresent it in a clean and readable format.\n\nDo not modify the weeks.\n\nDo not add new learning topics.\n\n--------------------------------------------------------\n\n========================================================\nLIVE JOB RECOMMENDATIONS\n========================================================\n\nGenerate\n\n# 💼 Live Job Recommendations\n\nDisplay every available job from the Job Search Agent.\n\nFor each job include\n\n• Job Title\n\n• Company\n\n• Location\n\n• Employment Type\n\n• Apply Link\n\n• Why it Matches\n\n• Potential Skill Gap\n\nRules\n\n• Never invent jobs.\n\n• Never invent companies.\n\n• Never invent URLs.\n\n• Never modify job titles.\n\n• Never modify locations.\n\n• If no jobs are available, display\n\n\"No suitable live job opportunities were found.\"\n\n• Rank jobs from best match to lowest match.\n\n• Use only information available from the Job Search Agent and previous reports.\n========================================================\nFINAL CAREER ADVICE\n========================================================\n\nGenerate\n\n# 🎯 Final Career Advice\n\nProvide a concise, actionable conclusion based ONLY on the previous agents' outputs.\n\nInclude\n\n## Current Career Readiness\n\nSummarize the candidate's current readiness in 2–3 professional sentences.\n\nDo not repeat earlier sections.\n\n--------------------------------------------------------\n\n## Top 3 Skills to Prioritize\n\nList exactly three skills.\n\nRules\n\n• Select from the identified Skill Gap Analysis.\n\n• Prioritize Required Skills before Preferred Skills.\n\n• Do not introduce new skills.\n\n--------------------------------------------------------\n\n## Suggested Learning Timeline\n\nProvide a realistic estimate based on the existing Learning Roadmap.\n\nExamples\n\n• 4–6 weeks\n\n• 2–3 months\n\n• 3–6 months\n\nDo not invent a new roadmap.\n\n--------------------------------------------------------\n\n## Recommended Portfolio Project\n\nRecommend ONE project.\n\nRules\n\n• Align with the Recommended Role.\n\n• Support the identified skill gaps.\n\n• Keep it practical for a fresher.\n\nExplain in one concise paragraph why this project improves employability.\n\n--------------------------------------------------------\n\n## Job Application Strategy\n\nProvide 4–6 practical recommendations.\n\nExamples\n\n• Continue applying for entry-level roles that align with your profile.\n\n• Tailor your resume to each Job Description.\n\n• Strengthen your portfolio with practical projects.\n\n• Continue improving interview readiness.\n\n• Build hands-on experience in the identified priority skills.\n\nUse only evidence from previous agents.\n\n========================================================\nGLOBAL VALIDATION\n========================================================\n\nBefore generating the report verify\n\n✓ Career Decision values exactly match the Career Decision Agent.\n\n✓ Candidate Profile contains only verified information.\n\n✓ Match Analysis reuses existing analysis.\n\n✓ Skill Gap Analysis reuses identified gaps.\n\n✓ Learning Roadmap matches the Candidate Intelligence Agent.\n\n✓ Live Jobs come only from the Job Search Agent.\n\n✓ Portfolio Project aligns with the Recommended Role.\n\n✓ Final Career Advice is consistent with the Recommendation.\n\nIf any information cannot be verified, omit it.\n\nNever guess.\n\n========================================================\nFORMATTING RULES\n========================================================\n\nReturn the report in Markdown.\n\nUse\n\n• Headings\n\n• Bullet points\n\n• Markdown tables\n\n• Horizontal separators\n\nKeep paragraphs short and easy to scan.\n\nDo not return\n\n• JSON\n\n• HTML\n\n• XML\n\n• Code blocks\n\n========================================================\nFINAL EXECUTION INSTRUCTIONS\n========================================================\n\nGenerate ONE polished Enterprise Career Intelligence Report.\n\nUse ONLY the supplied inputs.\n\nNever perform new analysis.\n\nNever calculate new scores.\n\nNever invent skills, technologies, projects, companies, jobs, or recommendations.\n\nReuse and summarize the outputs from:\n\n• Candidate Intelligence Agent\n\n• Opportunity Intelligence Agent\n\n• Career Decision Agent\n\n• Job Search Agent\n\nMaintain consistency across every section.\n\nDo not explain your reasoning.\n\nReturn ONLY the completed Enterprise Career Intelligence Report.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        2592,
+        288
+      ],
+      "id": "ef657ea9-66c9-45fd-8edc-90d824d95952",
+      "name": "Final AI Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e213554-6391-4896-8a81-0226700ad359",
+              "name": "recommended_role",
+              "value": "={{ JSON.parse($json.output).recommended_role }}",
+              "type": "string"
+            },
+            {
+              "id": "70437773-efd9-4507-9c4a-99e75af60665",
+              "name": "location",
+              "value": "={{ JSON.parse($json.output).location }}",
+              "type": "string"
+            },
+            {
+              "id": "41c0e333-6f59-40e8-b9a0-9757fa5d4707",
+              "name": "overall_match",
+              "value": "={{ JSON.parse($json.output).overall_match }}",
+              "type": "string"
+            },
+            {
+              "id": "395ca5a1-667a-479d-a6b1-8749734cdc71",
+              "name": "recommendation",
+              "value": "={{ JSON.parse($json.output).recommendation }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2032,
+        144
+      ],
+      "id": "a10cc0a0-2b21-4c31-81f5-10e3104c7b0f",
+      "name": "Extract Decision Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1cb30171-64f4-4f7d-b3da-80f28a4eda22",
+              "name": "candidate_analysis",
+              "value": "={{ $('Candidate Intelligence Agent').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "a0b19c8f-22c2-4f32-8739-2ac582404745",
+              "name": "opportunity_analysis",
+              "value": "={{ $('Opportunity Intelligence Agent').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "af8f2758-0a83-4a21-8b67-1670d7c912a7",
+              "name": "career_decision",
+              "value": "={{ $('Career Decision Agent').item.json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "1d3b5f33-fa29-44b1-967d-acd80fd51358",
+              "name": "jobs",
+              "value": "={{ $json.data.jobs }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2384,
+        288
+      ],
+      "id": "0f500c9e-9fcf-4b77-a442-75ece4e5d937",
+      "name": "Merge Report Data"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Resume & JD Upload": {
+      "main": [
+        [
+          {
+            "node": "Resume Text Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Text Extractor": {
+      "main": [
+        [
+          {
+            "node": "Job Description Text Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Job Description Text Extractor": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input": {
+      "main": [
+        [
+          {
+            "node": "Candidate Intelligence Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate Intelligence Agent": {
+      "main": [
+        [
+          {
+            "node": "Opportunity Intelligence Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Opportunity Intelligence Agent": {
+      "main": [
+        [
+          {
+            "node": "Career Decision Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Career Decision Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract Decision Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Candidate Intelligence Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Opportunity Intelligence Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Career Decision Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge Report Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Final AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Decision Data": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Report Data": {
+      "main": [
+        [
+          {
+            "node": "Final AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "eedba2c0-41f2-43bb-babe-ffbb0734f350",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fbed04167b7ffcb3eff566786d4df439910e64cd50cc9cfae3479aaa2631ae07"
+  },
+  "nodeGroups": [],
+  "id": "0PPDyCuNfxhXuedy",
+  "tags": []
+}
